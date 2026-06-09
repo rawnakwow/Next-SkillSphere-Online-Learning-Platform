@@ -1,71 +1,90 @@
 "use client";
-import React from "react";
+import React, { useContext } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { authClient } from "@/lib/auth-client";
-import toast from "react-hot-toast";
 import Image from "next/image";
-export default function Navbar() {
-  const router = useRouter();
-  
-  const { data: session, isPending } = authClient.useSession();
+import { AuthContext } from "@/context/AuthContext";
 
-  const handleLogout = async () => {
-    try {
-      await authClient.signOut();
-      toast.success("Logged out successfully");
-      router.push("/");
-      router.refresh();
-    } catch (err) {
-      toast.error("An error occurred during logout");
-    }
-  };
+export default function Navbar() {
+  const { user, logout, isPending } = useContext(AuthContext);
 
   return (
-    <div className="navbar bg-base-100 shadow-sm border-b border-base-200 sticky top-0 z-50 px-4 md:px-8">
+    <div className="navbar bg-white border-b border-gray-100 sticky top-0 z-50 px-6 md:px-12 h-16 shadow-sm">
+      
+      {/* Brand Logo & Navigation Links */}
       <div className="navbar-start">
-        <Link href="/" className="text-xl font-black text-primary tracking-tight">
-          🎓 SkillSphere
+        <Link href="/" className="text-xl font-black text-indigo-900 tracking-tight">
+          SkillSphere
         </Link>
+        
+        {/* Navigation Track Links (Visible on desktop) */}
+        <div className="hidden md:flex ml-8 gap-6 text-sm font-semibold text-gray-600">
+          <Link href="/" className="hover:text-indigo-900 transition-colors">Home</Link>
+          <Link href="/courses" className="hover:text-indigo-900 transition-colors">Courses</Link>
+          {user && (
+            <Link href="/profile" className="hover:text-indigo-900 transition-colors">
+              My Profile
+            </Link>
+          )}
+        </div>
       </div>
 
-      <div className="navbar-center hidden md:flex">
-        <ul className="menu menu-horizontal px-1 gap-2 font-medium text-sm">
-          <li><Link href="/">Home</Link></li>
-          <li><Link href="/courses">Courses</Link></li>
-          {session && <li><Link href="/profile">My Profile</Link></li>}
-        </ul>
+      {/*  Middle Section: Search Bar Input */}
+      <div className="navbar-center hidden lg:flex w-full max-w-xs relative">
+        <span className="absolute inset-y-0 left-3 flex items-center pointer-events-none text-gray-400 text-xs">
+          🔍
+        </span>
+        <input 
+          type="text" 
+          placeholder="Search courses..." 
+          className="input input-bordered w-full h-9 pl-9 bg-gray-50 border-gray-200 focus:outline-none focus:border-indigo-900 text-xs rounded-lg"
+        />
       </div>
 
-      <div className="navbar-end gap-2">
+      {/* Right Section: Conditional Action State Buttons */}
+      <div className="navbar-end gap-3">
         {isPending ? (
-          <span className="loading loading-spinner loading-sm text-primary"></span>
-        ) : session ? (
+          <span className="loading loading-spinner loading-xs text-indigo-900"></span>
+        ) : user ? (
+          
+          /* IF LOGGED IN: Show user avatar & dropdown menu containing Logout */
           <div className="dropdown dropdown-end">
-            <div tabIndex={0} role="button" className="btn btn-ghost btn-circle avatar border border-primary/20">
-              <div className="w-10 rounded-full bg-base-300">
-                   <Image 
-                    src={session.user.image || "https://unsplash.com"} 
-                           alt={session.user.name || "User Avatar"} 
-                            width={40} 
-                                 height={40}
-                               className="rounded-full object-cover"
-                                />             
-             </div>
+            <div tabIndex={0} role="button" className="btn btn-ghost btn-circle avatar border border-indigo-900/20">
+              <div className="w-9 h-9 rounded-full bg-gray-200 relative overflow-hidden">
+                <Image 
+                  src={user.image || "https://unsplash.com"} 
+                  alt={user.name || "User Avatar"} 
+                  fill
+                  sizes="36px"
+                  className="rounded-full object-cover"
+                />
+              </div>
             </div>
-            <ul tabIndex={0} className="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow-xl bg-base-100 rounded-box w-52 border border-base-200">
-              <li className="px-4 py-2 border-b border-base-100 font-bold text-xs text-base-content/60">
-                Hello, {session.user.name}
+            <ul tabIndex={0} className="menu menu-sm dropdown-content mt-3 p-2 shadow-2xl bg-white rounded-xl w-52 border border-gray-100 z-50">
+              <li className="px-4 py-2 border-b border-gray-100 font-bold text-xs text-gray-400 select-none">
+                Hi, {user.name}
               </li>
-              <li><Link href="/profile">View Profile</Link></li>
-              <li><Link href="/profile/update">Update Settings</Link></li>
-              <li><button onClick={handleLogout} className="text-error font-semibold">Logout</button></li>
+              <li className="md:hidden"><Link href="/">Home</Link></li>
+              <li className="md:hidden"><Link href="/courses">Courses</Link></li>
+              <li><Link href="/profile">My Profile</Link></li>
+              <li><Link href="/profile/update">Edit Profile Info</Link></li>
+              <li>
+                {/* Logout button */}
+                <button onClick={logout} className="text-red-600 font-bold hover:bg-red-50">
+                  Logout
+                </button>
+              </li>
             </ul>
           </div>
         ) : (
-          <div className="flex gap-2">
-            <Link href="/login" className="btn btn-ghost btn-sm font-semibold">Log In</Link>
-            <Link href="/register" className="btn btn-primary btn-sm px-4">Register</Link>
+          
+          /*  IF LOGGED OUT: Show Login / Register action buttons */
+          <div className="flex items-center gap-2">
+            <Link href="/login" className="text-xs font-bold text-gray-700 hover:text-indigo-900 px-3 py-2 transition-colors">
+              Login
+            </Link>
+            <Link href="/register" className="btn btn-sm bg-indigo-900 hover:bg-indigo-950 text-white font-bold px-4 tracking-wide rounded-lg border-none normal-case text-xs shadow-sm">
+              Register
+            </Link>
           </div>
         )}
       </div>
