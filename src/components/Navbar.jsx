@@ -1,53 +1,80 @@
-import React from 'react';
-
-// components/Navbar.jsx
 "use client";
+import React from "react";
 import Link from "next/link";
-import { useApp } from "@/context/AppContext";
-
+import { useRouter } from "next/navigation";
+import { authClient } from "@/lib/auth-client";
+import toast from "react-hot-toast";
+import Image from "next/image";
 export default function Navbar() {
-  const { user, loading, logout, showToast } = useApp();
+  const router = useRouter();
+  
+  // React reactive context session listeners from BetterAuth library hooks
+  const { data: session, isPending } = authClient.useSession();
 
   const handleLogout = async () => {
     try {
-      await logout();
-      showToast("Logged out successfully");
+      await authClient.signOut();
+      toast.success("Logged out successfully");
+      router.push("/");
+      router.refresh();
     } catch (err) {
-      showToast("Logout failed", "error");
+      toast.error("An error occurred during logout");
     }
   };
 
   return (
-    <nav style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "15px 30px", background: "#1F2937", color: "white" }}>
-      <div>
-        <Link href="/" style={{ fontSize: "24px", fontWeight: "bold", textDecoration: "none", color: "white" }}>SkillSphere</Link>
+    <div className="navbar bg-base-100 shadow-sm border-b border-base-200 sticky top-0 z-50 px-4 md:px-8">
+      {/* Brand Identification */}
+      <div className="navbar-start">
+        <Link href="/" className="text-xl font-black text-primary tracking-tight">
+          🎓 SkillSphere
+        </Link>
       </div>
-      <div style={{ display: "flex", gap: "25px", alignItems: "center" }}>
-        <Link href="/" style={{ color: "#E5E7EB", textDecoration: "none" }}>Home</Link>
-        <Link href="/courses" style={{ color: "#E5E7EB", textDecoration: "none" }}>Courses</Link>
-        
-        {!loading && (
-          <>
-            {user ? (
-              <div style={{ display: "flex", alignItems: "center", gap: "15px" }}>
-                <img 
-                  src={user.photoURL || "https://unsplash.com"} 
-                  alt="Profile" 
-                  style={{ width: "35px", height: "35px", borderRadius: "50%", objectFit: "cover", border: "2px solid #3B82F6" }} 
-                />
-                <button onClick={handleLogout} style={{ background: "#EF4444", color: "white", border: "none", padding: "8px 14px", borderRadius: "4px", cursor: "pointer", fontWeight: "bold" }}>
-                  Logout
-                </button>
-              </div>
-            ) : (
-              <div style={{ display: "flex", gap: "12px" }}>
-                <Link href="/login" style={{ background: "#3B82F6", color: "white", padding: "8px 16px", borderRadius: "4px", textDecoration: "none", fontWeight: "bold" }}>Login</Link>
-                <Link href="/register" style={{ border: "1px solid #9CA3AF", color: "#E5E7EB", padding: "8px 16px", borderRadius: "4px", textDecoration: "none" }}>Register</Link>
-              </div>
-            )}
-          </>
+
+      {/* Main Core Tracking Anchors */}
+      <div className="navbar-center hidden md:flex">
+        <ul className="menu menu-horizontal px-1 gap-2 font-medium text-sm">
+          <li><Link href="/">Home</Link></li>
+          <li><Link href="/courses">Courses</Link></li>
+          {session && <li><Link href="/profile">My Profile</Link></li>}
+        </ul>
+      </div>
+
+      {/* Contextual Action State Logic Blocks */}
+      <div className="navbar-end gap-2">
+        {isPending ? (
+          <span className="loading loading-spinner loading-sm text-primary"></span>
+        ) : session ? (
+          /* Profile Options Panel for Authorized Accounts */
+          <div className="dropdown dropdown-end">
+            <div tabIndex={0} role="button" className="btn btn-ghost btn-circle avatar border border-primary/20">
+              <div className="w-10 rounded-full bg-base-300">
+                   <Image 
+                    src={session.user.image || "https://unsplash.com"} 
+                           alt={session.user.name || "User Avatar"} 
+                            width={40} 
+                                 height={40}
+                               className="rounded-full object-cover"
+                                />             
+             </div>
+            </div>
+            <ul tabIndex={0} className="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow-xl bg-base-100 rounded-box w-52 border border-base-200">
+              <li className="px-4 py-2 border-b border-base-100 font-bold text-xs text-base-content/60">
+                Hello, {session.user.name}
+              </li>
+              <li><Link href="/profile">View Profile</Link></li>
+              <li><Link href="/profile/update">Update Settings</Link></li>
+              <li><button onClick={handleLogout} className="text-error font-semibold">Logout</button></li>
+            </ul>
+          </div>
+        ) : (
+          /* Landing Triggers for Guest Users */
+          <div className="flex gap-2">
+            <Link href="/login" className="btn btn-ghost btn-sm font-semibold">Log In</Link>
+            <Link href="/register" className="btn btn-primary btn-sm px-4">Register</Link>
+          </div>
         )}
       </div>
-    </nav>
+    </div>
   );
 }
