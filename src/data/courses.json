@@ -1,0 +1,68 @@
+[
+  {
+    "id": 1,
+    "title": "Mastering Full-Stack Web Development",
+    "instructor": "Sarah Jenkins, Senior Engineer",
+    "duration": "42 Hours",
+    "rating": 4.9,
+    "level": "Advanced",
+    "description": "Master deep frontend architectures, database patterns, and deployment pipelines using production systems.",
+    "image": "https://unsplash.com",
+    "category": "Development"
+  },
+  {
+    "id": 2,
+    "title": "UI/UX Design Fundamentals",
+    "instructor": "David Chen, Design Lead",
+    "duration": "28 Hours",
+    "rating": 4.8,
+    "level": "Beginner",
+    "description": "Learn typography, scalable component systems, responsive design principles, and modern tools like Figma.",
+    "image": "https://unsplash.com",
+    "category": "Design"
+  },
+  {
+    "id": 3,
+    "title": "Growth Hacking for Startups",
+    "instructor": "Elena Rodriguez, Growth Specialist",
+    "duration": "15 Hours",
+    "rating": 4.7,
+    "level": "Intermediate",
+    "description": "Acquire data-driven marketing concepts, optimization tools, performance analytics tracking, and scaling paths.",
+    "image": "https://unsplash.com",
+    "category": "Marketing"
+  },
+  {
+    "id": 4,
+    "title": "Python for Data Analysis",
+    "instructor": "Marcus Thorne, Data Scientist",
+    "duration": "35 Hours",
+    "rating": 4.9,
+    "level": "Intermediate",
+    "description": "Process structural datasets, compile linear models, and configure data matrices using Python.",
+    "image": "https://unsplash.com",
+    "category": "Data Science"
+  },
+  {
+    "id": 5,
+    "title": "Agile Project Management",
+    "instructor": "Sarah Miller, PMP Certified",
+    "duration": "20 Hours",
+    "rating": 4.6,
+    "level": "Beginner",
+    "description": "Develop organizational patterns, run sprint pipelines, map milestones, and optimize development velocities.",
+    "image": "https://unsplash.com",
+    "category": "Business"
+  },
+  {
+    "id": 6,
+    "title": "Social Media Strategy 2024",
+    "instructor": "Kevin Hart, Marketing Director",
+    "duration": "18 Hours",
+    "rating": 4.8,
+    "level": "Beginner",
+    "description": "Engage modern cross-platform communities, schedule scalable programmatic content campaigns, and boost metrics.",
+    "image": "https://unsplash.com",
+    "category": "Marketing"
+  }
+]
