@@ -1,83 +1,112 @@
-// app/login/page.jsx
 "use client";
-import { useState, Suspense } from "react";
-import { useApp } from "@/context/AppContext";
+import React, { useState, useContext } from "react";
+import { authClient } from "@/lib/auth-client";
 import { useRouter, useSearchParams } from "next/navigation";
+import { AuthContext } from "@/context/AuthContext";
+import toast from "react-hot-toast";
 import Link from "next/link";
 
-function LoginForm() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [localError, setLocalError] = useState("");
-  const { loginWithEmail, loginWithGoogle, showToast } = useApp();
+export default function LoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { setUser } = useContext(AuthContext);
   
-  // Captures target location for redirect behavior
-  const from = searchParams.get("from") || "/";
+  const callbackUrl = searchParams.get("callbackUrl") || "/";
 
-  const handleEmailLogin = async (e) => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleLoginSubmit = async (e) => {
     e.preventDefault();
-    setLocalError("");
+    setLoading(true);
+
     try {
-      await loginWithEmail(email, password);
-      showToast("Welcome back!");
-      router.replace(from);
+      const { data } = await authClient.signIn.email({
+        email: email,
+        password: password,
+      });
+
+      if (data?.user) {
+        setUser(data.user);
+      }
+
+      toast.success("Welcome back to SkillSphere!");
+      router.push(callbackUrl); 
+      router.refresh();
     } catch (err) {
-      const msg = err.message.replace("Firebase: ", "");
-      setLocalError(msg);
-      showToast(msg, "error");
+      toast.error(err.message || "Invalid credentials. Please verify and try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleGoogleAuth = async () => {
-    setLocalError("");
+  const handleGoogleLoginClick = async () => {
     try {
-      await loginWithGoogle();
-      showToast("Authenticated with Google successfully");
-      router.replace("/");
+      await authClient.signIn.social({ 
+        provider: "google", 
+        callbackUrl: callbackUrl 
+      });
     } catch (err) {
-      const msg = err.message.replace("Firebase: ", "");
-      setLocalError(msg);
-      showToast(msg, "error");
+      toast.error("Google authentication service connection issue.");
     }
   };
 
   return (
-    <div style={{ maxWidth: "420px", margin: "60px auto", padding: "30px", background: "white", border: "1px solid #E5E7EB", borderRadius: "8px", boxShadow: "0 4px 6px rgba(0,0,0,0.05)" }}>
-      <h2 style={{ textAlign: "center", marginBottom: "20px", color: "#1F2937" }}>Login</h2>
-      
-      {localError && <div style={{ color: "#EF4444", background: "#FEE2E2", padding: "10px", borderRadius: "4px", marginBottom: "15px", fontSize: "14px", fontWeight: "60px" }}>{localError}</div>}
+    <div className="flex justify-center items-center min-h-[85vh] bg-gray-50 px-4 py-8">
+      <div className="card w-full max-w-md bg-white shadow-xl rounded-2xl border border-gray-100">
+        <form onSubmit={handleLoginSubmit} className="card-body p-6 gap-3">
+          
+          <h2 className="text-2xl font-black text-center text-indigo-900 tracking-tight">Account Login</h2>
+          <p className="text-center text-xs text-gray-400 font-semibold mb-2">Access your training space and dashboard modules</p>
+          
+          <div className="form-control">
+            <label className="label-text font-bold text-gray-700 text-xs mb-1">Email Address</label>
+            <input 
+              type="email" 
+              required 
+              placeholder="name@domain.com" 
+              className="input input-bordered h-10 text-xs rounded-lg bg-gray-50/50 focus:outline-none focus:border-indigo-900" 
+              value={email} 
+              onChange={e => setEmail(e.target.value)} 
+            />
+          </div>
+          
+          <div className="form-control mt-1">
+            <label className="label-text font-bold text-gray-700 text-xs mb-1">Password</label>
+            <input 
+              type="password" 
+              required 
+              placeholder="••••••••" 
+              className="input input-bordered h-10 text-xs rounded-lg bg-gray-50/50 focus:outline-none focus:border-indigo-900" 
+              value={password} 
+              onChange={e => setPassword(e.target.value)} 
+            />
+          </div>
 
-      <form onSubmit={handleEmailLogin}>
-        <div style={{ marginBottom: "15px" }}>
-          <label style={{ display: "block", marginBottom: "5px", color: "#4B5563", fontWeight: "bold" }}>Email Address</label>
-          <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required style={{ width: "100%", padding: "10px", border: "1px solid #D1D5DB", borderRadius: "4px", boxSizing: "border-box" }} />
-        </div>
-        <div style={{ marginBottom: "20px" }}>
-          <label style={{ display: "block", marginBottom: "5px", color: "#4B5563", fontWeight: "bold" }}>Password</label>
-          <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required style={{ width: "100%", padding: "10px", border: "1px solid #D1D5DB", borderRadius: "4px", boxSizing: "border-box" }} />
-        </div>
-        <button type="submit" style={{ width: "100%", padding: "12px", backgroundColor: "#3B82F6", color: "white", border: "none", borderRadius: "4px", fontWeight: "bold", cursor: "pointer" }}>Login</button>
-      </form>
-
-      <div style={{ margin: "20px 0", textAlign: "center", color: "#9CA3AF" }}>or</div>
-
-      <button onClick={handleGoogleAuth} style={{ width: "100%", padding: "12px", backgroundColor: "#FFFFFF", color: "#1F2937", border: "1px solid #D1D5DB", borderRadius: "4px", fontWeight: "bold", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: "10px" }}>
-        <img src="https://idfy.com" alt="Google" style={{ width: "18px" }} /> Continue with Google
-      </button>
-
-      <p style={{ textAlign: "center", marginTop: "20px", color: "#4B5563" }}>
-        New to SkillSphere? <Link href="/register" style={{ color: "#3B82F6", textDecoration: "none" }}>Register here</Link>
-      </p>
+          <button 
+            type="submit" 
+            disabled={loading} 
+            className="btn btn-sm bg-indigo-900 hover:bg-indigo-950 text-white font-bold h-10 rounded-lg border-none normal-case tracking-wide text-xs w-full mt-3 shadow-md"
+          >
+            {loading ? "Logging in..." : "Login"}
+          </button>
+          
+          <div className="divider text-[10px] text-gray-400 font-bold uppercase tracking-widest my-1">OR</div>
+          
+          <button 
+            type="button" 
+            onClick={handleGoogleLoginClick} 
+            className="btn btn-sm btn-outline border-gray-200 text-gray-700 h-10 text-xs rounded-lg font-bold w-full normal-case flex items-center justify-center gap-2"
+          >
+            Continue with Google
+          </button>
+          
+          <p className="text-xs text-center mt-3 font-medium text-gray-500">
+            Don't have an account? <Link href="/register" className="link link-primary font-bold">Register here</Link>
+          </p>
+        </form>
+      </div>
     </div>
-  );
-}
-
-export default function LoginPage() {
-  return (
-    <Suspense fallback={<div style={{ textAlign: "center", padding: "50px" }}>Loading Auth Config...</div>}>
-      <LoginForm />
-    </Suspense>
   );
 }
