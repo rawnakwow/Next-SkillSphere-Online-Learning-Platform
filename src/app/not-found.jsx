@@ -1,6 +1,5 @@
 'use client'; 
 import Link from 'next/link';
-
 export default function NotFound() {
   return (
     <div style={{ textAlign: 'center', padding: '100px 20px', minHeight: '60vh' }}>

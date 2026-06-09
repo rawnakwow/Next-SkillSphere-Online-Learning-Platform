@@ -1,4 +1,3 @@
-// src/app/layout.js
 import "./globals.css";
 import React from "react";
 import Navbar from "@/components/Navbar";
