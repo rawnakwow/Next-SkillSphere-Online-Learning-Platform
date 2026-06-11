@@ -52,6 +52,7 @@ export default function LoginPage() {
     }
   };
 
+  
   return (
     <div className="flex justify-center items-center min-h-[85vh] bg-gray-50 px-4 py-8">
       <div className="card w-full max-w-md bg-white shadow-xl rounded-2xl border border-gray-100">
@@ -103,7 +104,7 @@ export default function LoginPage() {
           </button>
           
           <p className="text-xs text-center mt-3 font-medium text-gray-500">
-            Don't have an account? <Link href="/register" className="link link-primary font-bold">Register here</Link>
+            Do not have an account? <Link href="/register" className="link link-primary font-bold">Register here</Link>
           </p>
         </form>
       </div>
