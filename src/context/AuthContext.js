@@ -10,6 +10,7 @@ export function AuthProvider({ children }) {
 
   const { data: session, isPending: sessionPending } = authClient.useSession();
 
+  
   useEffect(() => {
     if (!sessionPending) {
       setUser(session?.user || null);
